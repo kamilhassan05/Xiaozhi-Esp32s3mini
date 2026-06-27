@@ -1,0 +1,32 @@
+{
+  "name": "Xiaozhi AI Assistant",
+  "version": "1.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "firmware/bootloader.bin",
+          "offset": "0x0"
+        },
+        {
+          "path": "firmware/partition-table.bin",
+          "offset": "0x8000"
+        },
+        {
+          "path": "firmware/ota_data_initial.bin",
+          "offset": "0xd000"
+        },
+        {
+          "path": "firmware/xiaozhi.bin",
+          "offset": "0x10000"
+        },
+        {
+          "path": "firmware/generated_assets.bin",
+          "offset": "0x300000"
+        }
+      ]
+    }
+  ]
+}

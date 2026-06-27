@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xiaozhi AI Assistant — Firmware Flasher</title>
+  <meta name="description" content="Flash Xiaozhi AI Assistant firmware to your ESP32-S3 directly from your browser. No software install required." />
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #21262d;
+      --border-hi: #30363d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --accent:    #3b82f6;
+      --accent-hi: #60a5fa;
+      --warn-bg:   #161b22;
+      --warn-bdr:  #30363d;
+      --warn-text: #e6edf3;
+      --ok-bg:     #0a1f12;
+      --ok-bdr:    #16a34a;
+      --ok-text:   #4ade80;
+      --radius:    10px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-hi);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 56px 0 40px;
+      text-align: center;
+    }
+
+    .chip-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ok-text);
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-bdr);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .chip-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--ok-text);
+    }
+
+    h1 {
+      font-size: clamp(26px, 5vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--accent-hi) 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 480px;
+      margin: 0 auto 32px;
+    }
+
+    /* ── Flash Card ── */
+    .flash-card {
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .flash-card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .flash-card p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── ESP Web Tools button styling ── */
+    esp-web-install-button {
+      display: block;
+    }
+
+    esp-web-install-button::part(button) {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    esp-web-install-button::part(button):hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    esp-web-install-button::part(button):active {
+      transform: translateY(0);
+    }
+
+    /* Fallback for browsers that don't support ::part() */
+    .install-btn-wrap button,
+    .install-btn-wrap [slot="activate"] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .browser-note {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .browser-note a {
+      color: var(--accent-hi);
+      text-decoration: none;
+    }
+
+    .browser-note a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    section { margin-bottom: 28px; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* ── Steps ── */
+    .steps { list-style: none; }
+
+    .steps li {
+      display: flex;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps li:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-hi);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-body strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .step-body span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── Warning ── */
+    .warning {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-bdr);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    .warning-body { font-size: 13px; color: var(--warn-text); }
+
+    .warning-body strong { display: block; margin-bottom: 3px; font-size: 13px; }
+
+    /* ── Troubleshoot ── */
+    .trouble-list { list-style: none; }
+
+    .trouble-list li {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .trouble-list li:last-child { border-bottom: none; }
+
+    .trouble-list strong {
+      color: var(--text);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .trouble-list span { color: var(--muted); }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent-hi);
+    }
+
+    /* ── Firmware table ── */
+    .fw-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .fw-table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .fw-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .fw-table tr:last-child td { border-bottom: none; }
+
+    .fw-table td:last-child { color: var(--muted); font-family: monospace; font-size: 12px; }
+
+    /* ── Compat chips ── */
+    .compat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 16px 18px;
+    }
+
+    .compat-chip {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-hi);
+      color: var(--muted);
+    }
+
+    .compat-chip.ok {
+      background: var(--ok-bg);
+      border-color: var(--ok-bdr);
+      color: var(--ok-text);
+    }
+
+    .compat-chip.no {
+      background: #1a0a0a;
+      border-color: #7f1d1d;
+      color: #f87171;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent-hi);
+      text-decoration: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .flash-card { padding: 24px 18px; }
+      .hero { padding: 36px 0 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a class="brand" href="#">
+        <div class="brand-icon">🤖</div>
+        <span class="brand-name">Kamil Hassan</span>
+      </a>
+      <span class="badge">ESP32-S3</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main>
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="chip-tag">Supported: ESP32-S3 Mini · ESP32-S3 Zero Mini</div>
+      <h1>Flash <span>Xiaozhi AI Assistant</span><br>from Your Browser</h1>
+      <p class="hero-sub">No software to install. Connect your board via USB, click the button below, and you're done in under a minute.</p>
+    </div>
+
+    <!-- Flash Card -->
+    <div class="flash-card">
+      <h2>⚡ Flash Firmware</h2>
+      <p>Make sure your ESP32-S3 is connected via USB before clicking.</p>
+      <div class="install-btn-wrap">
+        <esp-web-install-button manifest="manifest.json">
+          <button slot="activate">⚡ Flash Xiaozhi Firmware</button>
+        </esp-web-install-button>
+      </div>
+      <p class="browser-note">
+        Requires Chrome or Edge on desktop. 
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility" target="_blank" rel="noopener">Learn why →</a>
+      </p>
+    </div>
+
+    <!-- Steps -->
+    <section>
+      <p class="section-title">How to Flash</p>
+      <div class="card">
+        <ul class="steps">
+          <li>
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Install USB Drivers</strong>
+              <span>Most systems detect ESP32-S3 automatically. If not, install the <a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers" target="_blank" rel="noopener" style="color:var(--accent-hi);text-decoration:none">CP210x driver</a> or <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html" target="_blank" rel="noopener" style="color:var(--accent-hi);text-decoration:none">CH340 driver</a>.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Enter Bootloader Mode</strong>
+              <span>Hold the <code>BOOT</code> button, press <code>RESET</code> once, then release <code>BOOT</code>. The board is now in flash mode.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Connect via USB</strong>
+              <span>Plug your ESP32-S3 into your computer using a data-capable USB cable (not a charge-only cable).</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Click "Flash Firmware"</strong>
+              <span>Select the correct COM port in the browser dialog, then click Install. Wait for the process to complete (about 30–90 seconds).</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Press Reset</strong>
+              <span>After flashing completes, press the <code>RESET</code> button on your board. Xiaozhi AI Assistant will boot up.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Warning -->
+    <section>
+      <div class="warning">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-body">
+          <strong>Before you flash</strong>
+          Flashing will erase existing firmware on the device. Make sure you are using a data USB cable, not a charge-only cable. If the port does not appear in the browser dialog, try a different cable or USB port.
+        </div>
+      </div>
+    </section>
+
+    <!-- Firmware Files -->
+    <section>
+      <p class="section-title">Firmware Files</p>
+      <div class="card">
+        <table class="fw-table">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Offset</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>bootloader.bin</td><td>0x0</td></tr>
+            <tr><td>partition-table.bin</td><td>0x8000</td></tr>
+            <tr><td>ota_data_initial.bin</td><td>0xd000</td></tr>
+            <tr><td>xiaozhi.bin</td><td>0x10000</td></tr>
+            <tr><td>generated_assets.bin</td><td>0x300000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Browser Compatibility -->
+    <section>
+      <p class="section-title">Browser Compatibility</p>
+      <div class="card">
+        <div class="compat-row">
+          <span class="compat-chip ok">✓ Chrome 89+</span>
+          <span class="compat-chip ok">✓ Edge 89+</span>
+          <span class="compat-chip ok">✓ Opera 75+</span>
+          <span class="compat-chip no">✗ Firefox</span>
+          <span class="compat-chip no">✗ Safari</span>
+          <span class="compat-chip no">✗ Mobile browsers</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);padding:0 18px 14px">Web Serial API is required. Only Chromium-based desktop browsers support it.</p>
+      </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section>
+      <p class="section-title">Troubleshooting</p>
+      <div class="card">
+        <ul class="trouble-list">
+          <li>
+            <strong>No serial port appears in browser dialog</strong>
+            <span>Use a data USB cable. Try a different port. Install the correct USB driver (CP210x or CH340). On Windows, check Device Manager.</span>
+          </li>
+          <li>
+            <strong>Failed to download manifest</strong>
+            <span>Verify <code>manifest.json</code> is in the repo root. Check GitHub Pages is enabled. Open the manifest URL directly in browser to confirm it loads.</span>
+          </li>
+          <li>
+            <strong>Flashing fails or times out</strong>
+            <span>Hold <code>BOOT</code>, press <code>RESET</code>, release <code>BOOT</code> to enter bootloader mode manually, then retry.</span>
+          </li>
+          <li>
+            <strong>GitHub Pages 404 on firmware files</strong>
+            <span>Confirm all <code>.bin</code> files are inside the <code>firmware/</code> folder in your repo. Paths in <code>manifest.json</code> must match exactly (case-sensitive).</span>
+          </li>
+          <li>
+            <strong>Page loads but button does nothing</strong>
+            <span>You are not using a supported browser. Switch to Chrome or Edge on a desktop computer.</span>
+          </li>
+          <li>
+            <strong>Garbled audio / distorted sound after flash</strong>
+            <span>Make sure the MAX98357A speaker amplifier is powered from 5V, not 3.3V. 3.3V will cause audio distortion.</span>
+          </li>
+          <li>
+            <strong>How to verify BIN files are accessible</strong>
+            <span>Open <code>https://your-username.github.io/your-repo/firmware/bootloader.bin</code> in your browser. If it downloads, the path is correct.</span>
+          </li>
+          <li>
+            <strong>How to clear browser cache</strong>
+            <span>Press <code>Ctrl+Shift+R</code> (Windows/Linux) or <code>Cmd+Shift+R</code> (Mac) for a hard reload. Or clear cache from browser settings.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </div><!-- /container -->
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p>Built by <strong>Kamil Hassan</strong> · Powered by <a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener">ESP Web Tools</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
