@@ -1,4 +1,4 @@
-# Kamil-Hassan AI Assistant
+# Modified Xiaozhi AI Assistant
 
 > AI voice assistant built on ESP32-S3 Super Mini Zero · Powered by Xiaozhi AI
 
@@ -139,7 +139,7 @@ storage,  data, spiffs,  0x300000, 0x0,
         {
             "name": "Kamil-Hassan",
             "sdkconfig_append": [
-                "CONFIG_OLED_SSD1306_128X32=y"
+                "CONFIG_OLED_SSD1306_128X64=y"
             ]
         }
     ]
