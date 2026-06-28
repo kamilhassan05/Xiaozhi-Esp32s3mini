@@ -222,7 +222,7 @@ All files are located in: `Xiaozhi-Esp32s3mini/firmware/`
 | Very low volume | Use 3W 4ohm speaker minimum |
 | Mic not working | Connect L/R pin to GND |
 | Device crashes after talking | Check all GND connections are solid |
-| OLED not working | Verify SDA=GPIO 8, SCL=GPIO 9 |
+| OLED not working | Verify SDA=GPIO 7, SCL=GPIO 8 |
 | Relay not responding | Verify IN pin=GPIO 12, VCC=5V |
 
 ---
