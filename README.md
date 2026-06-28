@@ -164,7 +164,7 @@ Use **ESP Flash Download Tool** with settings: ESP32-S3, 4MB, DIO, 80MHz
 | xiaozhi.bin | 0x10000 |
 | generated_assets.bin | 0x300000 |
 
-All files are located in: `C:\Users\YourName\Desktop\xiaozhi-esp32\build\`
+All files are located in: `Xiaozhi-Esp32s3mini/firmware/`
 
 ---
 
