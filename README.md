@@ -1,7 +1,7 @@
 # Modified Xiaozhi AI Assistant
 
 > AI voice assistant built on ESP32-S3 Super Mini Zero · Powered by Xiaozhi AI
-> I built this for the ESP32-S3 Super Mini Zero (4 MB flash,   2 MB PSRAM). It runs faster, gives more accurate results, and performs better than the other models I've tested.
+> I built this for the ESP32-S3 Super Mini Zero (4 MB flash,        2 MB PSRAM). It runs faster, gives more accurate results, and performs better than the other models I've tested.
 
 > I also managed to reduce the overall size of the assistant, and added cute animated eyes that come to life while it's listening and speaking. mode.
 
