@@ -63,8 +63,8 @@
 |----------|-------------|------------|
 | VCC | VDD / 3V3 | 3.3V |
 | GND | GND | GND |
-| SDA | DATA / DAT | GPIO 8 |
-| SCL | CLK / SCK | GPIO 9 |
+| SDA | DATA / DAT | GPIO 7 |
+| SCL | CLK / SCK | GPIO 8 |
 
 ---
 
@@ -83,9 +83,9 @@
 | Button | GPIO | Function |
 |--------|------|----------|
 | Boot / Talk | GPIO 0 | Start / stop conversation |
-| Touch | GPIO 10 | Hold to talk |
-| Volume Up | GPIO 40 | Increase volume by 10% |
-| Volume Down | GPIO 39 | Decrease volume by 10% |
+| Touch | GPIO 11 | Hold to talk |
+| Volume Up | GPIO 9 | Increase volume by 10% |
+| Volume Down | GPIO 10 | Decrease volume by 10% |
 
 ---
 
@@ -107,16 +107,16 @@
 #define AUDIO_I2S_SPK_GPIO_BCLK GPIO_NUM_2
 #define AUDIO_I2S_SPK_GPIO_LRCK GPIO_NUM_3
 
-#define BUILTIN_LED_GPIO        GPIO_NUM_48
+#define BUILTIN_LED_GPIO        GPIO_NUM_21
 #define BOOT_BUTTON_GPIO        GPIO_NUM_0
-#define TOUCH_BUTTON_GPIO       GPIO_NUM_10
-#define VOLUME_UP_BUTTON_GPIO   GPIO_NUM_40
-#define VOLUME_DOWN_BUTTON_GPIO GPIO_NUM_39
+#define TOUCH_BUTTON_GPIO       GPIO_NUM_11
+#define VOLUME_UP_BUTTON_GPIO   GPIO_NUM_9
+#define VOLUME_DOWN_BUTTON_GPIO GPIO_NUM_10
 
-#define DISPLAY_SDA_PIN GPIO_NUM_8
-#define DISPLAY_SCL_PIN GPIO_NUM_9
+#define DISPLAY_SDA_PIN GPIO_NUM_7
+#define DISPLAY_SCL_PIN GPIO_NUM_8
 #define DISPLAY_WIDTH   128
-#define DISPLAY_HEIGHT  32
+#define DISPLAY_HEIGHT  64
 
 #define LAMP_GPIO GPIO_NUM_12
 ```
@@ -126,11 +126,10 @@
 ### `partitions.csv`
 
 ```
-# Name,   Type, SubType, Offset,   Size,  Flags
-nvs,      data, nvs,     0x9000,   0x5000,
-otadata,  data, ota,     0xe000,   0x2000,
-factory,  app,  factory, 0x10000,  0x2F0000,
-storage,  data, spiffs,  0x300000, 0x0,
+# Name,    Type, SubType, Offset,   Size,     Flags
+nvs,      data, nvs,     0x9000,   0x6000,
+factory,  app,  factory, 0x1F000,  0x2A1000,
+storage,  data, spiffs,  0x2C0000, 0x140000,
 ```
 
 ---
